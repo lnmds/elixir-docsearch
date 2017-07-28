@@ -28,7 +28,8 @@ async def index(request):
     return web.Response(text='This is an elixir-docsearch server!')
 
 async def search(request):
-    query = request.query.get('query')
+    payload = await request.json()
+    query = payload['query']
 
     t = app.loop.run_in_executor(None, search_map, query)
     res = await t
