@@ -1,7 +1,11 @@
 import asyncio
 import pickle
+import logging
 
 from aiohttp import web
+
+logging.basicConfig(level=logging.DEBUG)
+log = logging.getLogger(__name__)
 
 app = web.Application()
 docmap = None
@@ -15,11 +19,20 @@ def search_map(query):
     query = query.lower()
 
     for entry in docmap:
-        if query in entry['name'].lower():
-            res.append((entry['name'], 1))
+        score = 0
 
-        if query in entry['data']:
-            res.append((entry['name'], 0.5))
+        data = entry['data']
+
+        if query in data:
+            count = data.count(query)
+            score = count / 50
+
+        if query in entry['name'].lower():
+            score = 1
+
+        score = min(score, 1)
+        if score > 0.3:
+            res.append((entry['name'], score))
 
     s = sorted(res, key=lambda e: e[1], reverse=True)
     return s
@@ -30,10 +43,16 @@ async def index(request):
 async def search(request):
     payload = await request.json()
     query = payload['query']
+    limit = payload.get('limit', 15)
+
+    if len(query) == 0:
+        return web.Response(status=400, text='BAD REQUEST')
+
+    log.info('Searching for %r', query)
 
     t = app.loop.run_in_executor(None, search_map, query)
     res = await t
-    res = res[:15]
+    res = res[:limit]
 
     return web.json_response(res)
 
