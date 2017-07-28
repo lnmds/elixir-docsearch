@@ -22,7 +22,7 @@ def search_map(query):
             res.append((entry['name'], 0.5))
 
     s = sorted(res, key=lambda e: e[1], reverse=True)
-    return [e[0] for e in s]
+    return s
 
 async def index(request):
     return web.Response(text='This is an elixir-docsearch server!')
