@@ -31,7 +31,7 @@ def search_map(query):
             score = 1
 
         score = min(score, 1)
-        if score > 0.3:
+        if score > 0.05:
             res.append((entry['name'], score))
 
     s = sorted(res, key=lambda e: e[1], reverse=True)
