@@ -31,6 +31,7 @@ def search_map(query):
             score = 1
 
         score = min(score, 1)
+        score = round(score, 2)
         if score > 0.05:
             res.append((entry['name'], score))
 
